@@ -3,7 +3,7 @@ const siteMetadata = {
   title: 'Y',
   author: 'Yanbin',
   headerTitle: 'Y',
-  description: '全栈开发，react前端，node后端，evm系。rust学习中',
+  description: '全栈开发，react前端，node后端，evm系区块链。rust学习中',
   language: 'zh-CN',
   theme: 'system', // system, dark or light
   siteUrl: 'https://yanbin.cc/',
@@ -45,11 +45,11 @@ const siteMetadata = {
     //   googleAnalyticsId: '', // e.g. G-XXXXXXX
     // },
   },
-  newsletter: {
-    // supports mailchimp, buttondown, convertkit, klaviyo, revue, emailoctopus
-    // Please add your .env file and modify it according to your selection
-    provider: 'buttondown',
-  },
+  // newsletter: {
+  //   // supports mailchimp, buttondown, convertkit, klaviyo, revue, emailoctopus
+  //   // Please add your .env file and modify it according to your selection
+  //   provider: 'buttondown',
+  // },
   comments: {
     // If you want to use an analytics provider you have to add it to the
     // content security policy in the `next.config.js` file.
