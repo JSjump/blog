@@ -1,8 +1,8 @@
 /** @type {import("pliny/config").PlinyConfig } */
 const siteMetadata = {
-  title: 'Yanbin',
-  author: 'Yanbin Zhu',
-  headerTitle: 'YanbinBlog',
+  title: 'Y',
+  author: 'Yanbin',
+  headerTitle: 'Y',
   description: '全栈开发，react前端，node后端，evm系。rust学习中',
   language: 'zh-CN',
   theme: 'dark', // system, dark or light
