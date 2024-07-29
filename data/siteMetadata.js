@@ -5,9 +5,9 @@ const siteMetadata = {
   headerTitle: 'Y',
   description: '全栈开发，react前端，node后端，evm系。rust学习中',
   language: 'zh-CN',
-  theme: 'dark', // system, dark or light
-  siteUrl: 'https://tailwind-nextjs-starter-blog.vercel.app',
-  siteRepo: 'https://github.com/timlrx/tailwind-nextjs-starter-blog',
+  theme: 'system', // system, dark or light
+  siteUrl: 'https://yanbin.cc/',
+  siteRepo: 'https://github.com/JSjump/blog',
   siteLogo: '/static/images/logo.png',
   socialBanner: '/static/images/logo.png',
   // mastodon: 'https://mastodon.social/@mastodonuser',
@@ -69,7 +69,7 @@ const siteMetadata = {
       metadata: '0',
       // theme example: light, dark, dark_dimmed, dark_high_contrast
       // transparent_dark, preferred_color_scheme, custom
-      theme: 'dark',
+      theme: 'light',
       // theme when dark mode
       darkTheme: 'transparent_dark',
       // If the theme option above is set to 'custom`
