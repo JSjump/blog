@@ -17,39 +17,53 @@ Redis是一个使用ANSIC编写的支持网络、`基于内存`、分布式、�
 - 高并发：大量请求都走数据库会导致数据库连接异常，需要redis做缓冲，先访问redis
 
 ## 适合场景举例：
-1. 缓存
-![cache](/static/images/redis/cache.jpg)
 
-2. 会话存储（session）
-![session](/static/images/redis/session.jpg)
+### 1.缓存
+
+<Image className="w-full" width={300} height={150} src="/static/images/redis/cache.jpg" alt="cache"/>
+{/* ![cache](/static/images/redis/cache.jpg) */}
+
+### 2.会话存储（session）
+
+<Image className="w-full" width={300} height={150} src="/static/images/redis/session.jpg" alt="session"/>
+{/* ![session](/static/images/redis/session.jpg) */}
 当用户登录Web应用时候，将会话数据存储于Redis，并将唯一的会话ID（Session ID）返回到客户端的Cookie中。当用户再向应用发送请求时，会将此会话ID包含在请求中。无状态的Web服务器，根据这个会话ID从Redis中搜索相关的会话数据来进一步请求处理。
 
-3. 分布式锁（Distributed Lock）
-![DistributedBlock0](/static/images/redis/distributedBlock0.jpg)
-![DistributedBlock1](/static/images/redis/distributedBlock1.jpg)
+### 3.分布式锁（Distributed Lock）
+
+<Image className="w-full" width={300} height={150} src="/static/images/redis/distributedBlock0.jpg" alt="distributedBlock0"/>
+<Image className="w-full" width={300} height={150} src="/static/images/redis/distributedBlock1.jpg" alt="distributedBlock1"/>
+{/* ![DistributedBlock0](/static/images/redis/distributedBlock0.jpg)
+![DistributedBlock1](/public/static/images/redis/distributedBlock1.jpg) */}
 主要是用Redis的原子操作命令：`SETNX`，该命令仅允许key不存在的时候才能设置key
 
-    如上图所示。 Client 1通过`SETNX`命令尝试创建lock `1234abcd`。如果当前还没有这个key，那么将返回1。Client 1获得锁，就可以执行对共享资源的操作，操作完成之后，删除刚刚创建的lock（释放分布式锁）。如果Client 1在执行`SETNX`命令的时候，返回了0，说明有其他客户端占用了这key，那么等待一段时间（等其他节点释放）之后再尝试。
+如上图所示。 Client 1通过`SETNX`命令尝试创建lock `1234abcd`。如果当前还没有这个key，那么将返回1。Client 1获得锁，就可以执行对共享资源的操作，操作完成之后，删除刚刚创建的lock（释放分布式锁）。如果Client 1在执行`SETNX`命令的时候，返回了0，说明有其他客户端占用了这key，那么等待一段时间（等其他节点释放）之后再尝试。
 
-4. 速率限制器（Rate Limiter）
+### 4.速率限制器（Rate Limiter）
 
     通过redis计数器功能，配合超时时间，来实现速率限制器，最常见的场景就是服务端是用的请求限流.
-![rateLimit](/static/images/redis/rateLimit.jpg)
+
+<Image className="w-full" width={300} height={150} src="/static/images/redis/rateLimit.jpg" alt="rateLimit"/>   
+{/* ![rateLimit](/static/images/redis/rateLimit.jpg) */}
     根据用户id或者ip来作为key，使用`INCR`命令来记录用户的请求数量。然后将该请求数量与允许的请求上限数量做比较，只有低于限制的时候，才会执行请求处理。如果超过限制，就拒绝请求。
     
     同时，请求数量的计数器需要设置一个时间窗口，比如：1分钟。也就是没过一分钟时间，计数器将被清零，重新计数。所以，当一个时间窗口中被限流之后，等到下一个时间窗口，就能恢复继续请求。以实现限制速率的效果。如下图：
 
     时间窗口算法：
-![timeWindow](/static/images/redis/timeWindow.jpg)
+<Image className="w-full" width={300} height={150} src="/static/images/redis/timeWindow.jpg" alt="timeWindow"/>
+{/* ![timeWindow](/static/images/redis/timeWindow.jpg) */}
     漏桶算法：
-![leakBucket](/static/images/redis/leakBucket.jpg)
+<Image className="w-full" width={300} height={150}  src="/static/images/redis/leakBucket.jpg" alt="leakBucket"/>
+{/* ![leakBucket](/static/images/redis/leakBucket.jpg) */}
 
-5. 排行榜（Rank/Leaderboard）
+### 5.排行榜（Rank/Leaderboard）
 
     通过排序集合（Sorted Sets）的功能实现各种排行榜功能
-![rank](/static/images/redis/rank.jpg)
+<Image className="w-full" width={300} height={150}  src="/static/images/redis/rank.jpg" alt="rank"/>
+{/* ![rank](/static/images/redis/rank.jpg) */}
     排序集合是唯一元素（比如：用户id）的集合，每个元素按分数排序，这样可以快速的按分数来检索元素
-![rank1](/static/images/redis/rank1.jpg)
+<Image className="w-full" width={300} height={150}  src="/static/images/redis/rank1.jpg" alt="rank1"/>
+{/* ![rank1](/public/static/images/redis/rank1.jpg) */}
 
 # How (redis的各种场景是怎样实现的)
 
@@ -60,8 +74,11 @@ Redis是一个使用ANSIC编写的支持网络、`基于内存`、分布式、�
 
 
 # Why (为什么要用redis)
-![whyUseRedis0](/static/images/redis/whyUse0.jpg)
-![whyUseRedis1](/static/images/redis/whyUse1.jpg)
+
+<Image className="w-full" width={300} height={150}  src="/static/images/redis/whyUse0.jpg" alt="whyUse0"/>
+<Image className="w-full" width={300} height={150}  src="/static/images/redis/whyUse1.jpg" alt="whyUse1"/>
+{/* ![whyUseRedis0](/static/images/redis/whyUse0.jpg)
+![whyUseRedis1](/static/images/redis/whyUse1.jpg) */}
 
 # Redis导致的问题
 1.缓存和数据库数据不一致，双写不一致
@@ -76,8 +93,10 @@ Redis是一个使用ANSIC编写的支持网络、`基于内存`、分布式、�
 
 # recap:
 
-![recap](/static/images/redis/recap.jpg)
-![recap1](/static/images/redis/recap1.jpg)
+<Image className="w-full" width={300} height={150}  src="/static/images/redis/whyUse0.jpg" alt="whyUse0"/>
+<Image className="w-full" width={300} height={150}  src="/static/images/redis/whyUse1.jpg" alt="whyUse1"/>
+{/* ![recap](../../../public/static/images/redis/recap.jpg)
+![recap1](../../../public/static/images/redis/recap1.jpg) */}
 
 
 # quote:
