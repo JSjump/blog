@@ -57,7 +57,7 @@ const securityHeaders = [
 const output = process.env.EXPORT ? 'export' : undefined
 const basePath = process.env.BASE_PATH || undefined
 const unoptimized = process.env.UNOPTIMIZED ? true : undefined
-
+console.log('output', output)
 /**
  * @type {import('next/dist/next-server/server/config').NextConfig}
  **/
