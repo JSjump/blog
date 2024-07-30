@@ -1,6 +1,6 @@
 /** @type {import("pliny/config").PlinyConfig } */
 const siteMetadata = {
-  title: 'Y',
+  title: 'YBinary',
   author: 'Yanbin',
   headerTitle: 'Y',
   description: '全栈开发，react前端，node后端，evm系区块链。rust学习中',
