@@ -2,7 +2,7 @@
 const siteMetadata = {
   title: 'YBinary',
   author: 'Yanbin',
-  headerTitle: 'Y',
+  headerTitle: 'YBinary',
   description: '全栈开发，react前端，node后端，evm系区块链。rust学习中',
   language: 'zh-CN',
   theme: 'system', // system, dark or light
