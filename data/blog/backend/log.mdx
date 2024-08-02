@@ -1,0 +1,38 @@
+---
+title: log 概念及使用理解
+date: '2024-08-02'
+tags: ['log', 'backend','log4js','middleware']
+draft: false
+summary: Redis的定义，使用场景，以及使用后可能会造成的问题
+---
+
+# What
+前端日志主要记录用户与网页的交互行为，如点击、输入、页面跳转等。
+后端日志则记录服务器处理请求的过程和结果，包括请求的来源、处理时间、返回的数据等。
+
+# When 
+后端日志可分`访问日志`和`应用日志`。
+- 访问日志：记录客户端对项目的访问，主要是 http 请求。这些数据属于运营数据，也可以反过来帮助改进和提升网站的性能和用户体验。
+- 应用日志：应用日志是项目中需要特殊标记和记录的位置打印的日志，包括出现异常的情况，方便开发人员查询项目的运行状态和定位 bug 。应用日志包含了debug、info、warn 和 error等级别的日志。
+
+# How
+
+    可`直接使用`或通过`中间件`方式使用。
+
+
+# 日志工具-log4js
+
+[使用手册](https://blog.csdn.net/qq_37012965/article/details/124932263?ydreferer=aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS8%3D)
+
+## 概念及使用方式 
+   - 1.log4js相关概念及使用方式(基础)(https://blog.csdn.net/qq_39834073/article/details/107986691)
+
+   - 2.koa2 封装为中间件的使用方式(https://github.com/ikcamp/koa2-tutorial/tree/8-mi-log?tab=readme-ov-file)
+
+   - 3.多了logLevelFilter的使用以及connectLogger的使用(https://www.cnblogs.com/Joans/p/9647601.html)
+
+   - 4.结合2/3的使用方式(https://blog.csdn.net/DahlinSky/article/details/107196993)
+
+   - 5.自定义使用案例(https://juejin.cn/post/7210756376310284349#heading-2)
+
+
