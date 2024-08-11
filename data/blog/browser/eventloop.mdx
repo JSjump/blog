@@ -1,0 +1,85 @@
+---
+title: Evnet Loop事件循环
+date: '2024-08-11'
+tags: ['frontend', 'browser','Evnet Loop']
+draft: false
+summary: 浏览器 及 node 的Evnet Loop
+---
+
+
+# What
+在 JavaScript 的所有宿主环境中，无论是浏览器还是 Node.js，事件循环机制都不是 ECMAScript 的语言规范定义的。浏览器中的事件循环是根据 HTML 标准实现的，而 Node.js 中的事件循环则是基于 libuv 实现的。
+
+
+## 浏览器主要process 和 thread
+- JavaScript中的进程有：一个浏览器主进程、一个GPU进程、一个网络进程、多个渲染进程和插件进程。
+- JavaScript中的线程有：GUI渲染线程、JS引擎线程、计时器线程、异步HTTP请求线程、事件触发线程。
+
+
+# 浏览器 Event Loop:
+不同浏览器，除微队列外，队列的种类和数量均可能不同，这取决于浏览器厂商。
+在目前的 Chrome 的实现中，至少包含了下面几个队列：
+
+```
+ 微队列：用于存放需要最快执行的任务，优先级极高，将任务加入微队列的方式有 promise.then() 、MutationObserver
+ 交互队列：用于存放用户操作后产生的事件处理任务，优先级次于微队列
+ 延迟队列：用于存放定时器到达后的回调任务，优先级次于交互队列
+```
+
+# node.js Event Loop:
+
+与在浏览器中一样，在 nodejs 中 JS 最开始在主线程上执行，执行同步任务、发出异步请求、规划定时器生效时间、执行 process.nextTick 等，这时事件循环还没开始。
+在上述过程中，如果没有异步操作，代码在执行完成后便直接退出。如果有，libuv 会把不同的异步任务分配给不同的线程，形成事件循环。在同步代码执行完后，nodejs 便会进入事件循环，依次执行不同队列中的任务。
+libuv 会以异步的方式将任务的执行结果返回给 V8 引擎，V8 引擎再返回给用户。
+
+```
+宏队列
+    1.timers (重要)
+    2.pending callback(调用上一次事件循环没在 poll 阶段立刻执行，而延迟的 I/O 回调函数)
+    3.idle prepare(仅供 nodejs 内部使用)
+    4.poll (重要)
+    5.check (重要)
+    6.close callbacks(执行所有注册 close 事件的回调函数)
+
+微队列
+    1.nextTick
+    2.Promise
+```
+
+### timer
+    也就是计时器队列，负责处理 setTimeout 和 setInterval 定义的回调函数。`poll 阶段的结束条件前，就无法进入下一次事件循环的 timers 阶段，即使 timers 队列中已经有计时器到期的回调函数`。
+
+
+
+### poll
+    poll 称为轮询队列，该阶段会处理除 timers 和 check 队列外的绝大多数 I/O 回调任务，如文件读取、监听用户请求等。
+
+    运行方式
+    - 如果 poll 队列中有回调任务，则依次执行回调直到清空队列。
+    - 如果 poll 队列中没有回调任务
+
+        - 若其他队列中后续可能会出现回调任务，则一直等待，等其他队列中后续的回调任务来临时，结束该阶段，开启下一次事件循环
+        - 若等待时间超过预设的时间限制，也会自动进入下一次事件循环
+        - 若其他队列中后续不可能再出现回调任务了，则立即结束该阶段，并在本轮事件循环完成后，退出 node 程序
+
+
+
+### check
+    check 称为检查队列，负责处理 setImmediate 定义的回调函数
+
+    setTimeout 和 setImmediate 的不同之处在于，每次执行到 timers 队列时，定时器观察者内部会去检查代码中的定时器是否超过定时时间，而 setImmediate 则是直接将回调任务加入到 check 队列。
+
+
+
+### nextTick 和 Promise
+
+    1.微队列的 nextTick 和 Promise，严格意义上讲也不属于事件循环。在事件循环中，`每次打算进入下个阶段之前，必须要先依次反复清空 nextTick 和 promise 队列，直到两个队列完全没有即将要到来的任务的时候再进入下个阶段`。
+
+
+    2.nextTick 队列的优先级还要高于 Promise 队列，所以 process.nextTick 是 nodejs 中执行最快的异步操作
+
+
+# Quoter:
+- [事件循环最新文章](https://juejin.cn/post/7326803868326592539)
+
+- [此资料中关于node-eventloop的资料已经过时](https://juejin.cn/post/6844903761949753352#heading-1)

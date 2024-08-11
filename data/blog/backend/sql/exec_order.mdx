@@ -1,0 +1,47 @@
+---
+title: sql 语句执行顺序
+date: '2024-08-02'
+tags: ['backend', 'sql']
+draft: false
+summary: sql 语句执行顺序
+---
+
+简要版：
+from：需要从哪个数据表检索数据。
+where：过滤表中数据的条件。
+group by：如何将上⾯过滤出的数据分组 。
+having：对上⾯已经分组的数据进⾏过滤的条件。
+select：查看结果集中的哪个列，或列的计算结果。
+order by ：按照什么样的顺序来查看返回的数据。
+
+先执行on，后执行where；on是建立关联关系在生成临时表时候执行，where是在临时表生成后对数据进行筛选的。
+
+详细版：
+1.from 
+2.on 
+3.join 
+4.where 
+5.group by(开始使用select中的别名，后面的语句中都可以使用)
+6.avg,sum.... 
+7.having 
+8.select 
+9.distinct 
+10.order by
+11.limit 
+
+
+sql 语句大小写规范：
+1.关键字，函数名全都大写;
+2.数据库名，表名，字段名称全部小写
+3.sql语句必须分号结尾
+
+
+inner join 和 outer join 的区别
+INNER JOIN 只返回匹配的行，而 OUTER JOIN 返回所有行，包括匹配的行和不匹配的行。
+
+
+
+quote:
+https://blog.csdn.net/u014044812/article/details/51004754
+https://juejin.cn/post/6850418117764628487?from=search-suggest
+https://www.wandersky.org/program/sql-must-know/2022/10/05/2690/

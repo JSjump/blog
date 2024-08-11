@@ -1,0 +1,51 @@
+---
+title: sql 函数
+date: '2024-08-09'
+tags: ['backend', 'sql']
+draft: false
+summary: sql 语句执行顺序
+---
+SQL中包含以下七种类型的函数：
+
+
+
+聚合函数:返回汇总值。
+
+转型函数:将一种数据类型转换为另外一种。
+
+日期函数:处理日期和时间。
+
+数学函数:执行算术运算。
+
+字符串函数:对字符串、二进制数据或表达式执行操作。
+
+系统函数:从数据库返回SERVER中的值、对象或设置的特殊信息。
+
+文本和图像函数:对文本和图像数据执行操作。
+
+
+
+```sql
+SELECT COUNT(column_name) FROM table_name;
+```
+COUNT(column_name) 将不把 NULL 值作为计数的一部分。
+
+SQL 中的 NULL 值指的是表中不存在的值。
+有时你可以在 COUNT 函数括号内使用 *。
+```sql
+SELECT COUNT(*) FROM table_name;
+```
+COUNT(*) 函数将返回该组项目的总数，包括 NULL 值。
+
+
+
+有时你会看到 DISTINCT 关键字与 COUNT 函数一起使用
+```sql
+SELECT COUNT(DISTINCT column_name) FROM table_name;
+```
+DISTINCT 关键字将只计算 NOT NULL 的唯一值。计算机将忽略任何重复的值。
+
+
+quote:
+https://www.wandersky.org/program/sql-must-know/2022/10/05/2690/
+https://www.cda.cn/discuss/post/details/61ee1c9e5638e9075dfeea12

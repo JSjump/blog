@@ -1,0 +1,34 @@
+---
+title: web worker 及 service worker
+date: '2024-08-11'
+tags: ['browser', 'frontend','web worker','service worker']
+draft: false
+summary: web worker 及 service worker 相关理解
+---
+
+# What
+## Web worker
+独立于js线程,worker线程，帮助处理复杂js任务，不可操作dom，通过onmessage事件与主线程通信。
+
+## Service worker
+充当页面与服务器中之间的代理。 对数据请求与缓存。 基于Web worker。
+Service Worker 是一种在 Web Worker 上下文中运行的 JavaScript，它可以拦截和处理网页请求。与 Web Worker 不同，Service Worker 可以控制网络请求，实现离线缓存、消息推送等功能。它具有生命周期，并且可以在不同的时间点触发事件，例如 install、activate 等
+
+## Worklet
+Worklet 是浏览器渲染流中的钩子，可以让我们有浏览器渲染线程中底层的权限，比如样式和布局。
+
+
+
+# When（使用场景）
+Web Worker 主要用于执行后台计算任务，避免阻塞主线程；而 Service Worker 主要用于拦截和处理网络请求，实现离线缓存等功能。
+
+通信方式：Web Worker 与主线程之间可以通过 postMessage() 和 onmessage 进行通信；而 Service Worker 本身并不与主线程进行通信，而是通过拦截网络请求来实现与主线程的交互。
+
+生生命周期：Web Worker 的生命周期由浏览器控制，当页面关闭时 Web Worker 会被终止；而 Service Worker 的生命周期与它注册的页面相关联，即使页面关闭，Service Worker 也可能继续运行。
+
+使用场景：Web Worker 更适合执行复杂的计算任务，例如数据排序、图形渲染等；而 Service Worker 更适合实现离线缓存、消息推送等功能。
+
+# Quoter
+https://cloud.baidu.com/article/2720007
+https://juejin.cn/post/7131922258360500231#heading-3
+
