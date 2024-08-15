@@ -3,7 +3,7 @@ title: Evnet Loop事件循环
 date: '2024-08-11'
 tags: ['frontend', 'browser','Evnet Loop']
 draft: false
-summary: 浏览器 及 node 的Evnet Loop
+summary: 浏览器 及 node 的Evnet Loop,及常见异步task
 ---
 
 
@@ -25,6 +25,25 @@ summary: 浏览器 及 node 的Evnet Loop
  交互队列：用于存放用户操作后产生的事件处理任务，优先级次于微队列
  延迟队列：用于存放定时器到达后的回调任务，优先级次于交互队列
 ```
+
+```
+根据W3C最新标准,现代浏览器将宏任务队列的概念进一步做了细分。原来的宏任务主要包含：script(整体代码)、setTimeout、setInterval、I/O、UI交互事件、postMessage、MessageChannel、requestAnimationFrame、requestIdleCallback、setImmediate(Node.js 环境)等。
+
+注意：此处的MessageChannel即是React用来与requestAnimationFrame()用来模拟requestIdleCallback的api。
+requestAnimationFrame 也是天然的异步任务。
+```
+[常见异步任务](https://juejin.cn/post/7342512113170890764#heading-2)
+
+
+## 理解异步
+线程语言是没有严格意义的异步的，代码是从上至下依次执行的。上面讲的异步，是在浏览器维度来讲的，`js没有多线程`，但是`浏览器可以开辟多个线程`来`维护异步的任务`。
+
+
+渲染主线程执行 js 任务（js线程阻塞执行），主线程有承担渲染的其他任务，如果都同步执行，主线程就会白白消耗时间，页面经常性假死。
+
+
+采用消息循环+异步时，在`异步任务发生时`，主线程`将这个任务交给其他线程来执行`，`跳过这个任务往后执行`；`其他线程执行完毕后将回调包装成任务放入消息队列末尾`，`等待主线程调用`。
+
 
 # node.js Event Loop:
 
@@ -79,7 +98,11 @@ libuv 会以异步的方式将任务的执行结果返回给 V8 引擎，V8 引�
     2.nextTick 队列的优先级还要高于 Promise 队列，所以 process.nextTick 是 nodejs 中执行最快的异步操作
 
 
-# Quoter:
+# Quoter:(推荐度从上往下)
+- [较新较详细的浏览器事件循环文章](https://juejin.cn/post/7288956366515929088?from=search-suggest)
+
+- [事件循环-比较详细-推荐](https://juejin.cn/post/6844903764202094606#heading-13)
+
 - [事件循环最新文章](https://juejin.cn/post/7326803868326592539)
 
 - [此资料中关于node-eventloop的资料已经过时](https://juejin.cn/post/6844903761949753352#heading-1)
