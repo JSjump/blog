@@ -1,47 +1,81 @@
 ---
 title: sql 语句执行顺序
-date: '2024-08-02'
+date: '2024-08-017'
 tags: ['backend', 'sql']
-draft: false
 summary: sql 语句执行顺序
 ---
 
-简要版：
-from：需要从哪个数据表检索数据。
-where：过滤表中数据的条件。
-group by：如何将上⾯过滤出的数据分组 。
-having：对上⾯已经分组的数据进⾏过滤的条件。
-select：查看结果集中的哪个列，或列的计算结果。
-order by ：按照什么样的顺序来查看返回的数据。
+# 简要版：
+
+1.from：需要从哪个数据表检索数据。
+
+2.where：过滤表中数据的条件。
+
+3.group by：如何将上⾯过滤出的数据分组 。
+
+4.having：对上⾯已经分组的数据进⾏过滤的条件。
+
+5.select：查看结果集中的哪个列，或列的计算结果。
+
+6.order by ：按照什么样的顺序来查看返回的数据。
 
 先执行on，后执行where；on是建立关联关系在生成临时表时候执行，where是在临时表生成后对数据进行筛选的。
 
-详细版：
-1.from 
-2.on 
-3.join 
-4.where 
-5.group by(开始使用select中的别名，后面的语句中都可以使用)
-6.avg,sum.... 
-7.having 
-8.select 
-9.distinct 
-10.order by
-11.limit 
+# 详细版：
+1.from (两表做笛卡尔积，生成临时表temp1)
+
+2.on   (根据条件对temp1进行筛选生成临时表temp2)
+
+3.join (根据JOIN的类型不同来对虚表tmp2做行的增减,
+如果是LEFT (OUTER) JOIN就把上一步舍弃的左表的记录补回来，对应右表的数据用NULL填充；
+如果是RIGHT（OUTER） JOIN的话就把右表删除的记录补回来，
+同理FULL (OUTER) JOIN分别做类似的增加记录操作，
+但是(INNER) JOIN不会，
+所以这一步的操作主要针对的是OUTER JOIN。
+形成虚表temp3)
+
+- 若 from 子句中的表数目多余两个表，那么就将temp3和第三个表连接从而计算笛卡尔乘积，生成虚拟表，该过程就是一个重复1-3的步骤，最终得到一个新的虚拟表 temp3。
+
+4.where (应用where筛选器，对上一步生产的虚拟表引用where筛选器，生成虚拟表temp4)
+
+5.group by(group by 子句将中的唯一的值组合成为一组，得到虚拟表temp5.开始使用select中的别名，后面的语句中都可以使用)
+
+6.avg,sum.... (应用avg或者sum选项，为temp5生成超组，生成temp6.)
+
+7.having (应用having筛选器，生成temp7。having筛选器是第一个也是为唯一一个应用到已分组数据的筛选器)
+
+8.select (将temp7中的在select中出现的列筛选出来,生成temp8)
+
+9.distinct (做指定列的去重操作,生成temp9)
+
+10.order by (指定的列进行排序,生成temp10)
+
+11.limit (对已经做完各种操作后的结果集做限制输出)
 
 
+
+# 写法注意点
 sql 语句大小写规范：
+
 1.关键字，函数名全都大写;
+
 2.数据库名，表名，字段名称全部小写
+
 3.sql语句必须分号结尾
 
+# 使用注意点
+1.inner join 和 outer join 的区别
 
-inner join 和 outer join 的区别
-INNER JOIN 只返回匹配的行，而 OUTER JOIN 返回所有行，包括匹配的行和不匹配的行。
+2.INNER JOIN 只返回匹配的行，而 OUTER JOIN 返回所有行，包括匹配的行和不匹配的行。
 
 
 
-quote:
+
+
+Quote:
+
 https://blog.csdn.net/u014044812/article/details/51004754
+
 https://juejin.cn/post/6850418117764628487?from=search-suggest
+
 https://www.wandersky.org/program/sql-must-know/2022/10/05/2690/
