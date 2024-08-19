@@ -1,8 +1,8 @@
 ---
-title: sql 语句执行顺序
+title: sql语句执行顺序及各阶段注意点
 date: '2024-08-17'
 tags: ['backend', 'sql']
-summary: sql 语句执行顺序
+summary: sql语句执行顺序及各阶段注意点
 ---
 
 # 简要版：
@@ -40,15 +40,86 @@ summary: sql 语句执行顺序
 
 5.group by(group by 子句将中的唯一的值组合成为一组，得到虚拟表temp5.开始使用select中的别名，后面的语句中都可以使用)
 
-6.avg,sum.... (应用avg或者sum选项，为temp5生成超组，生成temp6.)
+- group by `后面可以 是 多列`，用`逗号分隔`
+- 虚拟表时不汇总为一行，但整个sql执行完最终输出时只输出单行记录
 
-7.having (应用having筛选器，生成temp7。having筛选器是第一个也是为唯一一个应用到已分组数据的筛选器)
+6.avg,sum.... (应用avg或者sum选项，为temp5生成超组，生成temp6.此时对分完组的数据 合并为一条记录，在合并过程中通过sql聚合函数处理)
+- `聚合函数将来自多行的数据汇总到单个结果行中` 有别于 `窗口函数`
+- `聚合函数是要显示的记录的该列的值做处理，而不是对记录做筛选`，例如`MIN`函数，会针对一组记录的某一列，使得要显示的那条记录的该列显示为该组所有列中的最小值等。
+- `聚合函数 自带GROUP BY效果`,哪怕不写GROUP BY,当使用SUM等聚合函数时,默认做分组聚合处理。所以当多条记录的表的其中一列求SUM等操作时,会做分组聚合处理,最终结果输出为1条记录。
+ 
+ 例：
+ ```sql
+SELECT (
+    ROUND(AVG(IF(order_date = customer_pref_delivery_date,1,0))*100,2)
+) AS immediate_percentage
+FROM Delivery
+WHERE (customer_id,order_date) IN (
+    SELECT customer_id,MIN(order_date)
+    FROM Delivery
+    GROUP BY 
+    customer_id
+)
+ ```
+ [详细体会可通过该连接做题感受,以上sql是题解](https://leetcode.cn/problems/immediate-food-delivery-ii/solutions/192925/ji-shi-shi-wu-pei-song-ii-by-leetcode-solution/?envType=study-plan-v2&envId=sql-free-50)
+
+7.having (应用having筛选器，生成temp7。having筛选器是第一个也是为唯一一个应用到`已分组数据`的筛选器,重点是针对已分组的)
 
 8.select (将temp7中的在select中出现的列筛选出来,生成temp8)
 
 9.distinct (做指定列的去重操作,生成temp9)
+- 不对表使用`group by` 如何`统计某表的某种分类的总数量`，可以通过 `DISTINCT 分类去重`
+- 一般而言，`DISTINCT子句是GROUP BY子句的特殊情况`。 DISTINCT子句和GROUP BY子句之间的区别是GROUP BY子句可对结果集进行排序，而DISTINCT子句不进行排序。
+ [更多请阅读]:(https://www.yiibai.com/mysql/distinct.html)
+
+例1:
+```sql
+SELECT teacher_id,COUNT(DISTINCT subject_id) AS cnt
+FROM Teacher
+GROUP BY 
+teacher_id
+```
+重点在于 `COUNT(DISTINCT subject_id)`。
+
+该sql简要执行过程如下：
+
+    (1). 先进行 GROUP BY 分组
+
+    (2). 执行聚合函数COUNT(),因其有`DISTINCT`关键字，遂 通过 DISTINCT 对已分类的不同类的虚拟表，根据目标字段对虚拟表记录进行去重操作。
+    该示例中的DISTINCT执行顺序为什么会直接对仍是分组中的数据进行操作，而不是对已分组后的数据操作，
+    这是`因为distinct在聚合函数count中，按照聚合函数的执行顺序去执行`。如果是单独的DISTINCT,不在聚合函数中，则按原顺序执行
+
+    (2).执行COUNT,对已经DISTINCT的记录进行计数。
+
+ [详细体会可通过该连接做题感受,以上sql是题解](https://leetcode.cn/problems/number-of-unique-subjects-taught-by-each-teacher/?envType=study-plan-v2&envId=sql-free-50)
+
+
+例2：
+ ```sql
+SELECT IFNULL(ROUND(COUNT(DISTINCT(result.player_id)) / 
+(SELECT COUNT(DISTINCT(Activity.player_id)) FROM Activity)
+,2),0) AS fraction
+FROM (
+    SELECT Activity.player_id as player_id
+    FROM Activity
+    LEFT JOIN
+    (
+        SELECT player_id,MIN(event_date) AS f_data
+        FROM Activity
+        GROUP BY player_id
+    ) AS f_ac
+    ON Activity.player_id = f_ac.player_id
+    WHERE DATEDIFF(Activity.event_date,f_ac.f_data) = 1
+) AS result
+ ```
+ [详细体会可通过该连接做题感受,以上sql是题解](https://leetcode.cn/problems/game-play-analysis-iv/?envType=study-plan-v2&envId=sql-free-50)
+
+
 
 10.order by (指定的列进行排序,生成temp10)
+
+- order by `后面可以 是 多列`，用`逗号分隔`
+
 
 11.limit (对已经做完各种操作后的结果集做限制输出)
 
