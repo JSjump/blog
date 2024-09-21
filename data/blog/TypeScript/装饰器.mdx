@@ -1,0 +1,214 @@
+---
+title: 装饰器语法
+date: '2024-09-19'
+tags: ['JavaScript','TypeScirpt']
+draft: false
+summary: 
+---
+
+
+## 装饰器是一种函数，写成@ + 函数名，可以用来装饰四种类型的值。
+    - 类
+    - 类的属性
+    - 类的方法
+    - 属性存取器（accessor）
+
+## 装饰器是一个函数，API 的类型描述如下（TypeScript 写法）。
+```TypeScript
+type Decorator = (value: Input, context: {
+  kind: string;
+  name: string | symbol;
+  access: {
+    get?(): unknown;
+    set?(value: unknown): void;
+  };
+  private?: boolean;
+  static?: boolean;
+  addInitializer?(initializer: () => void): void;
+}) => Output | void;
+```
+
+装饰器函数有两个参数。`运行时，JavaScript 引擎会提供这两个参数`。
+
+    - value：所要装饰的值，某些情况下可能是undefined（装饰属性时）。
+
+    - context：上下文信息对象。
+
+
+装饰器函数的返回值，是一个新版本的装饰对象，但也可以不返回任何值（void）。
+
+context对象有很多属性，其中kind属性表示属于哪一种装饰，其他属性的含义如下。
+
+    - kind：字符串，表示装饰类型，可能的取值有class、method、getter、setter、field、accessor。
+
+    - name：被装饰的值的名称: The name of the value, or in the case of private elements the description of it (e.g. the readable name).
+    
+    - access：对象，包含访问这个值的方法，即存值器和取值器。
+
+    - static: 布尔值，该值是否为静态元素。
+
+    - private：布尔值，该值是否为私有元素。
+
+    - addInitializer：函数，允许用户增加初始化逻辑。
+
+
+# accessor 命令
+
+新命令accessor，用来属性的前缀
+```typescript
+class C {
+  accessor x = 1;
+}
+```
+
+它是一种简写形式，相当于声明属性x是私有属性#x的存取接口。上面的代码等同于下面的代码。
+
+```typescript
+class C {
+  #x = 1;
+
+  get x() {
+    return this.#x;
+  }
+
+  set x(val) {
+    this.#x = val;
+  }
+}
+```
+
+accessor命令前面还可以接受属性装饰器
+```typescript
+function logged(value, { kind, name }) {
+  if (kind === "accessor") {
+    let { get, set } = value;
+
+    return {
+      get() {
+        console.log(`getting ${name}`);
+
+        return get.call(this);
+      },
+
+      set(val) {
+        console.log(`setting ${name} to ${val}`);
+
+        return set.call(this, val);
+      },
+
+      init(initialValue) {
+        console.log(`initializing ${name} with value ${initialValue}`);
+        return initialValue;
+      }
+    };
+  }
+
+  // ...
+}
+
+class C {
+  @logged accessor x = 1;
+}
+
+let c = new C();
+// initializing x with value 1
+c.x;
+// getting x
+c.x = 123;
+// setting x to 123
+```
+
+上面的示例等同于使用@logged装饰器，改写accessor属性的 getter 和 setter 方法。
+
+用于accessor的属性装饰器的类型描述如下。
+
+```typescript
+type ClassAutoAccessorDecorator = (
+  value: {
+    get: () => unknown;
+    set(value: unknown) => void;
+  },
+  context: {
+    kind: "accessor";
+    name: string | symbol;
+    access: { get(): unknown, set(value: unknown): void };
+    static: boolean;
+    private: boolean;
+    addInitializer(initializer: () => void): void;
+  }
+) => {
+  get?: () => unknown;
+  set?: (value: unknown) => void;
+  initialize?: (initialValue: unknown) => unknown;
+} | void;
+```
+
+accessor命令的
+`第一个参数`接收到的是一个对象，
+`包含了accessor命令定义的属性的存取器 get 和 set`。属性装饰器可以返回一个新对象，
+其中包含了新的存取器，用来取代原来的，即相当于拦截了原来的存取器。
+此外，返回的对象还可以包括一个initialize函数，用来改变私有属性的初始值。
+装饰器也可以不返回值，如果返回的是其他类型的值，或者包含其他属性的对象，就会报错。
+
+
+
+# addInitializer() 方法
+
+除了属性装饰器，其他装饰器的上下文对象还包括一个addInitializer()方法，用来完成初始化操作
+
+下面是一个例子
+```typescript
+function customElement(name) {
+  return (value, { addInitializer }) => {
+    addInitializer(function() {
+      customElements.define(name, this);
+    });
+  }
+}
+
+@customElement('my-element')
+class MyElement extends HTMLElement {
+  static get observedAttributes() {
+    return ['some', 'attrs'];
+  }
+}
+```
+上面的代码等同于下面不使用装饰器的代码
+
+```typescript
+class MyElement {
+  static get observedAttributes() {
+    return ['some', 'attrs'];
+  }
+}
+
+let initializersForMyElement = [];
+
+MyElement = customElement('my-element')(MyElement, {
+  kind: "class",
+  name: "MyElement",
+  addInitializer(fn) {
+    initializersForMyElement.push(fn);
+  },
+}) ?? MyElement;
+
+for (let initializer of initializersForMyElement) {
+  initializer.call(MyElement);
+}
+```
+
+{/* ### 装饰器的`执行步骤如下`。
+如果碰到多个装饰器：
+
+    1.计算各个装饰器的值，按照`从左到右，从上到下`的顺序。
+
+    2.调用方法装饰器。
+
+    3.调用类装饰器。 */}
+
+
+
+
+# Refernce
+
+1. https://es6.ruanyifeng.com/#docs/decorator#%E8%A3%85%E9%A5%B0%E5%99%A8-API%EF%BC%88%E6%96%B0%E8%AF%AD%E6%B3%95%EF%BC%89

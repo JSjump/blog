@@ -44,6 +44,8 @@ summary: sql语句执行顺序及各阶段注意点
 - 虚拟表时不汇总为一行，但整个sql执行完最终输出时只输出单行记录
 
 6.avg,sum.... (应用avg或者sum选项，为temp5生成超组，生成temp6.此时对分完组的数据 合并为一条记录，在合并过程中通过sql聚合函数处理)
+
+- `任何聚合函数都会在这个阶段执行，不管函数书写位置在SQL中的SELECT之后还是在HAVING之后!`。[详见](https://leetcode.cn/problems/sales-analysis-iii/description/?envType=study-plan-v2&envId=sql-free-50)
 - `聚合函数将来自多行的数据汇总到单个结果行中` 有别于 `窗口函数`
 - `聚合函数是要显示的记录的该列的值做处理，而不是对记录做筛选`，例如`MIN`函数，会针对一组记录的某一列，使得要显示的那条记录的该列显示为该组所有列中的最小值等。
 - `聚合函数 自带GROUP BY效果`,哪怕不写GROUP BY,当使用SUM等聚合函数时,默认做分组聚合处理。所以当多条记录的表的其中一列求SUM等操作时,会做分组聚合处理,最终结果输出为1条记录。
@@ -65,10 +67,16 @@ WHERE (customer_id,order_date) IN (
 
 7.having (应用having筛选器，生成temp7。having筛选器是第一个也是为唯一一个应用到`已分组数据`的筛选器,重点是针对已分组的)
 
+- 书写时写在HAVING之后的聚合函数（例如COUNT函数）。`执行时COUNT`时，还是`使用的未合并成一条记录的数据`。总结：不管聚合函数写在哪，若是语句中有聚合函数，则总是在GROUP BY之后执行
+
+- `HAVING子句是配合GROUP BY`使用的，单独使用HAVING本身是不符合规范.若是单独使用，MySQL会做一个重写，加上一个GROUP BY NULL，`GROUP BY NULL 等价于 LIMIT 1`。当GROUP BY NULL的时候，MAX/MIN函数是取所有数据里的最大和最小值
+
 8.select (将temp7中的在select中出现的列筛选出来,生成temp8)
 
 9.distinct (做指定列的去重操作,生成temp9)
+
 - 不对表使用`group by` 如何`统计某表的某种分类的总数量`，可以通过 `DISTINCT 分类去重`
+
 - 一般而言，`DISTINCT子句是GROUP BY子句的特殊情况`。 DISTINCT子句和GROUP BY子句之间的区别是GROUP BY子句可对结果集进行排序，而DISTINCT子句不进行排序。
  [更多请阅读]:(https://www.yiibai.com/mysql/distinct.html)
 
@@ -140,6 +148,9 @@ sql 语句大小写规范：
 2.INNER JOIN 只返回匹配的行，而 OUTER JOIN 返回所有行，包括匹配的行和不匹配的行。
 
 
+3.怎么理解 BOOLEAN expression ? it returns either 1 or 0.
+
+4.COUNT 会对 0 计数。 所以使用表达式后需要用OR NULL。使得返回值从0变为NULL.这样就不会被COUNT 统计。
 
 
 
@@ -150,3 +161,20 @@ https://blog.csdn.net/u014044812/article/details/51004754
 https://juejin.cn/post/6850418117764628487?from=search-suggest
 
 https://www.wandersky.org/program/sql-must-know/2022/10/05/2690/
+
+ {/* app.js
+ const express = require("express");
+ const app = express();
+ app.use("/", index);
+ app.use("/contact", contact);
+ app.use("/user", user);
+ module.exports = app;// 
+
+
+ server.js
+ const http = require("http");
+ const app = require("/app");
+
+ app.set('port', process.env.PORT);
+
+ const http = http.createServer(app); */}

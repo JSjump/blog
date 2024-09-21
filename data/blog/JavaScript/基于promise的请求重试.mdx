@@ -1,0 +1,51 @@
+---
+title: 基于promise的请求重试
+date: '2024-09-21'
+tags: ['JavaScript']
+draft: false
+summary:  promise
+---
+
+
+背景
+实现一个函数 实现一个重试功能，当异步任务失败时，等待N秒后会自动重试直到成功或达到最大重试次数。
+```JavaScript
+const query = () => {
+    return fetch(
+        'https://api.juejin.cn/user_api/v1/user/dynamic?user_id=3649990025815853&cursor=0&aid=2608&uuid=7387740407814587904&spider=0',
+    );
+};
+```
+
+```JavaScript
+
+const retryPromise = (task,count,time) => {
+
+  return   new Promise((resolve,reject) => {
+
+            let count_run = 0;
+            const run = () => {
+            
+                task()
+                .then((data) => {
+                    resolve(data)
+                })
+                .catch(e => {  
+                     count_run++;
+                    if(count_run <= count) {
+                        setTimeout(run,time)
+                    }else {
+                        reject(e)
+                    }
+                    
+                })
+
+            }
+
+        })
+
+}
+
+
+```
+
