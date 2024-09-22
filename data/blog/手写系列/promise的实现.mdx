@@ -1,0 +1,107 @@
+---
+title: promise的实现
+date: '2024-09-21'
+tags: ['手写系列']
+draft: false
+summary:  promise
+---
+
+```TypeScript
+
+class MyPromise {
+    constructor(fun) {
+        this.state = 'pending'
+
+        this.data = undefined
+        this.error = undefined
+
+        this.successCallback = [];
+        this.errorCallback = [];
+
+        try {
+            fun(this.resolve,this.reject)
+        } catch (error) {
+            this.reject(error)
+        }
+    }
+
+
+// 重点。不能这样简写方法。原因如下
+// 方法定义：在类中直接定义方法（例如 resolve(data) { ... }）是将该方法添加到类的原型上。
+// 这与在构造函数外部使用 MyPromise.prototype.resolve = function(data) { ... } 是等效的。
+// 所以这样写当实例化调用的时候会造成this 上下文丢失
+    // resolve(data) {
+    //     this.state = 'resolved'
+    //     this.data = data
+
+    //     while (this.successCallback.length) {
+    //         this.successCallback.shift()(this.data)
+    //     }
+    // }
+
+    resolve = (data) => {
+        this.state = 'resolved'
+        this.data = data
+
+        while (this.successCallback.length) {
+            this.successCallback.shift()(this.data)
+        }
+    }
+
+    reject = (error) => {
+        this.state = 'rejected'
+        this.error = error
+
+        while (this.errorCallback.length) {
+            this.errorCallback.shift()(this.error)
+        }
+    }
+
+    then = (successFn,failFn) => {
+        return new MyPromise((thenRes,thenRej) => {
+
+                // then链式调用，此处只针对，初始then返回的值为数值进行。 若是MyPromise类型，则需做另外处理
+                const onPendingHandleCallback =(callback) => (param) => {
+                    try {
+                     let cb =  callback(param)
+
+                    // 重点！！若then 参数是 MyPromise类型， 则将新MyPromise的thenRes  与 thenRej 传给返回的promise的then 作为参数
+                     if (cb instanceof MyPromise) {
+                        cb.then(thenRes,thenRej)
+                     } else {
+                        thenRes(cb)
+                     }
+                    } catch(e) {
+                        failFn(e)
+                    }
+     
+                }
+
+  
+
+                if(this.state === 'resolved') {
+                   thenRes(successFn(this.data))
+                }
+
+                if(this.state === 'rejected') {
+                  thenRej(failFn(this.error))
+                }
+
+                if(this.state === 'pending') {
+                    this.successCallback.push(onPendingHandleCallback(successFn))
+
+                    this.errorCallback.push(onPendingHandleCallback(failFn))
+                }
+        })
+    
+    }
+
+
+}
+
+```
+
+测试可见该例子：
+打开view 页面的开发者工具可看到结果
+https://codesandbox.io/p/sandbox/mypromise-hv8mrx
+
