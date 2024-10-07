@@ -110,5 +110,39 @@ int* p = NULL;
 `NULL`在 C 语言中是一个`常量`，表示`地址为0的内存空间`，这个地址是无法使用的，读写该地址会报错。
 
 
+
+
+### 例子
+
+```CPP
+#include<iostream>
+using namespace std;
+
+void test(int *p)
+{
+　　int a=1;
+　　p=&a;
+　　cout<<p<<"，"<<*p<<endl; // 输出 0x22ff44，1
+}
+
+int main(void)
+{
+    int *p=NULL;
+    test(p);
+    if(p==NULL)
+    cout<<"指针p为NULL"<<endl;  // if中的p == null, 输出 指针p为NULL
+    system("pause");
+    return 0;
+}
+```
+重点在p为什么是null?
+事实上，在main函数中声明了一个指针p，并赋值为NULL，当调用test函数时，事实上传递的也是地址，只不过传递的是指针地址。
+也就是说`将指针作为参数进行传递时，事实上也是值传递，只不过传递的是地址`。
+当把指针作为参数进行传递时，也是将实参的一个拷贝传递给形参，
+即上面程序`main函数中的p为何与test函数中使用的p不是同一个变量`，存储2个变量p的单元也不相同（只是2个p指向同一个存储单元），
+那么在test函数中对p进行修改，并不会影响到main函数中的p的值。
+
+
+
 ## Refernce
 https://wangdoc.com/clang/pointer
